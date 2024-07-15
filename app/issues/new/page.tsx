@@ -10,6 +10,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { createIssueSchema } from '@/app/validationSchemas';
 import { z } from 'zod'
 import ErrorMessage from '@/app/components/ErrorMessage';
+import Spinner from '@/app/components/Spinner';
 type IssueForm=z.infer<typeof createIssueSchema>
 
 const NewIssuePage = () => {
@@ -19,6 +20,7 @@ const NewIssuePage = () => {
   })
 
   const[error,setError]=useState('')
+  const [loading, setLoading] = useState(false)
   return (
     <div className='max-w-xl'>
       {error&&<Callout.Root color='red'  className='mb-5'>
@@ -28,9 +30,11 @@ const NewIssuePage = () => {
     className=' space-y-3 '
     onSubmit={handleSubmit(async(data)=>{
        try {
+        setLoading(true)
         await axios.post('/api/issues',data) 
         router.push('/issues')
        } catch (error) {
+          setLoading(false)
         setError('An unexpected error occured')
        }
       })}>
@@ -43,7 +47,7 @@ const NewIssuePage = () => {
           render={({field})=> < SimpleMDE placeholder='Description' {...field}/>}
         />
         <ErrorMessage >{errors.description?.message}</ErrorMessage>
-        <Button>Submit New Issue</Button>
+        <Button>Submit New Issue{loading&&<Spinner/>}</Button>
     </form>
     </div>
   )
